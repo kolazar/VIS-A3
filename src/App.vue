@@ -7,8 +7,11 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-md-5">
+        <!-- <div class="col-md-5">
           <BarChart/>
+        </div> -->
+        <div class="col-md-5">
+          <Scatterplot/>
         </div>
         <div class="col-md-7">
           <ChoroplethMap/>
@@ -19,14 +22,15 @@
 </template>
 
 <script>
-import BarChart from './components/BarChart.vue';
+// import BarChart from './components/BarChart.vue';
 import ChoroplethMap from './components/ChoroplethMap.vue';
 import YearSlider from './components/YearSlider.vue';
+import Scatterplot from './components/Scatterplot.vue';
 
 export default {
   name: 'App',
   components: {
-    BarChart, ChoroplethMap, YearSlider
+    Scatterplot, ChoroplethMap, YearSlider
   },
   mounted() {
     this.$store.dispatch('loadData');

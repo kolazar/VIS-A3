@@ -24,8 +24,18 @@ export default {
     }
   },
   mounted() {
+    this.drawScatterPlot();
   },
   methods: {
+    drawScatterPlot() {
+      
+    },
+    drawXAxis() {
+      
+    },
+    drawYAxis() {
+      
+    },
   },
   computed: {
     educationRates: {

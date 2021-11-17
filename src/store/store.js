@@ -6,10 +6,11 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    selectedYear: 2006,
+    selectedYear: 2010,
     selectedStates: [],
     educationRates: [],
     personalIncome: [],
+    combinedData: []
   },
   mutations: {
     changeSelectedYear (state, year) {
@@ -40,8 +41,18 @@ const store = new Vuex.Store({
         if (state.selectedYear in state.personalIncome[i]) {
           result.push({
             state: state.personalIncome[i].State,
-            value: state.personalIncome[i][state.selectedYear]
+            value: +state.personalIncome[i][state.selectedYear]
           })
+        }
+      }
+      return result;
+    },
+    combinedData (state) {
+      let result = [];
+      for (let i = 0; i < state.personalIncome.length; i++) {
+        if ((state.selectedYear in state.personalIncome[i]) && (state.selectedYear in state.educationRates[i])) {
+          result.push([+state.personalIncome[i][state.selectedYear],+state.educationRates[i][state.selectedYear]]
+          )
         }
       }
       return result;
