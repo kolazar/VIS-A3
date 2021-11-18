@@ -3,6 +3,11 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-12">
+          <h1>Average Personal Income vs Educational Attainment</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
           <YearSlider/>
         </div>
       </div>

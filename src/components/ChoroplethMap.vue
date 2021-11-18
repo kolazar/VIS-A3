@@ -1,11 +1,11 @@
 <template>
-  <div class="vis-component" ref="chart">
+  <div class="vis-component" ref="chart" >
     <div class="placeholder">
-      <b>Here comes the choropleth map</b>.
-      <p>Selected states by clicking on the bar chart: {{ selectedStates }}</p>
+      <!-- <b>Here comes the choropleth map</b>. -->
+      <!-- <p>Selected states by clicking on the bar chart: {{ selectedStates }}</p> -->
     </div>
     <svg class="main-svg" :width="svgWidth" :height="svgHeight">
-      <g class="chart-group" ref="chartGroup">
+      <g class="chart-group" ref="chartGroup" >
         <g class="map-group" ref="mapGroup"></g>
       </g>
     </svg>
@@ -78,16 +78,16 @@ export default {
     },
   },
   computed: {
-    educationRates: {
-      get() {
-        return this.$store.getters.educationRates;
-      },
-    },
-    personalIncome: {
-      get() {
-        return this.$store.getters.personalIncome;
-      },
-    },
+    // educationRates: {
+    //   get() {
+    //     return this.$store.getters.educationRates;
+    //   },
+    // },
+    // personalIncome: {
+    //   get() {
+    //     return this.$store.getters.personalIncome;
+    //   },
+    // },
     selectedStates: {
       get() {
         return this.$store.getters.selectedStates;
@@ -112,24 +112,24 @@ export default {
     },
   },
   watch: {
-    educationRates: {
-      handler() {
-        this.drawMap();
-      },
-      deep: true,
-    },
+    // educationRates: {
+    //   handler() {
+    //     this.drawMap();
+    //   },
+    //   deep: true,
+    // },
     // personalIncome: {
     //   handler() {
     //     this.drawMap();
     //   },
     //   deep: true,
     // },
-    // combinedData: {
-    //   handler() {
-    //     this.drawMap();
-    //   },
-    //   deep: true,
-    // },
+    combinedData: {
+      handler() {
+        this.drawMap();
+      },
+      deep: true,
+    },
   },
 };
 </script>
