@@ -47,7 +47,6 @@ export default {
   },
   mounted() {
     this.drawScatterPlot();
-    
   },
   methods: {
     drawScatterPlot() {
@@ -56,10 +55,10 @@ export default {
         "transform",
         `translate(${this.svgPadding.left},${this.svgPadding.top})`
       );
+      this.drawXAxis();
+      this.drawYAxis();
       this.drawRects();
       this.drawCircles();
-      this.drawXAxis();
-    this.drawYAxis();
     },
     drawXAxis() {
       d3.select(this.$refs.axisX)
@@ -69,13 +68,13 @@ export default {
             this.svgHeight - this.svgPadding.top - this.svgPadding.bottom
           } )`
         )
-        .call(d3.axisBottom(this.xScale))
+        .call(d3.axisBottom(this.xScale).tickFormat((d) => d + "%"))
         .append("text")
         .attr("y", 40)
         .attr("x", this.svgWidth / 2)
         .attr("text-anchor", "middle")
         .attr("fill", "black")
-        .text("Educational Attainment: Bachelor's Degree or Higher (%)");
+        .text("Educational Attainment: Bachelor's Degree or Higher");
     },
     drawYAxis() {
       d3.select(this.$refs.axisY)
@@ -90,34 +89,17 @@ export default {
     },
     drawRects() {
       const rectGroup = d3.select(this.$refs.rects);
-      //third attempt
 
-      let rectData = [];
-
-      d3.cross(d3.range(this.n), d3.range(this.n)).map(([i, j]) => {
-        rectData.push({
-          width: this.svgWidth/9,
-          height: this.svgWidth/9,
-          x: (i * (this.svgWidth/9)),
-          y: this.svgWidth - this.n - 1 - j*this.svgWidth/9 - 200,
-          fill: this.colors[j * this.n + i],
-        });
-      });
+     
 
       rectGroup
         .selectAll("rect")
-        .data(
-          rectData
-        )
+        .data(this.rectangularProps)
         .enter()
         .append("rect")
         .attr("x", (d) => d.x)
-        .attr(
-          "width",
-           (d) => d.width
-        )
-        .attr("y", (d) => d.y
-        )
+        .attr("width", (d) => d.width)
+        .attr("y", (d) => d.y)
         .attr("height", (d) => d.height)
         .style("fill", (d) => d.fill);
     },
@@ -158,7 +140,7 @@ export default {
       },
     },
     dataMaxEd() {
-      return d3.max(this.educationRates, (d) => d.value);
+      return d3.max(this.educationRates, (d) => d.value + 2);
     },
     dataMinEd() {
       return d3.min(this.educationRates, (d) => d.value);
@@ -178,7 +160,7 @@ export default {
       },
     },
     dataMaxInc() {
-      return d3.max(this.personalIncome, (d) => d.value);
+      return d3.max(this.personalIncome, (d) => d.value + 2000);
     },
     dataMinInc() {
       return d3.min(this.personalIncome, (d) => d.value);
@@ -209,6 +191,25 @@ export default {
         d3.range(this.n)
       );
     },
+    rectangularProps(){
+ let rectData = [];
+      let plotAreaWidth =
+        this.svgWidth - this.svgPadding.left - this.svgPadding.right;
+      let plotAreaHeight =
+        this.svgHeight - this.svgPadding.top - this.svgPadding.bottom;
+
+      //Calculating properties for the rectangles
+      d3.cross(d3.range(this.n), d3.range(this.n)).map(([i, j]) => {
+        rectData.push({
+          width: plotAreaWidth / 3,
+          height: plotAreaHeight / 3,
+          x: i * (plotAreaWidth / 3),
+          y: (this.n - 1 - j) * (plotAreaHeight / 3),
+          fill: this.colors[j * this.n + i],
+        });
+      });
+      return rectData;
+    }
   },
   watch: {
     combinedData: {

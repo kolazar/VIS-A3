@@ -27,3 +27,7 @@ yarn run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+## Assignment description
+It was decided to do scales not starting from zero to have a better representation of the data points on the scatterplot.
+
