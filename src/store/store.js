@@ -18,7 +18,7 @@ const store = new Vuex.Store({
     },
     changeSelectedState(state, val) {
       state.selectedStates.push(val);
-    }
+    },
   },
   getters: {
     selectedYear: (state) => state.selectedYear,

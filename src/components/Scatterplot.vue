@@ -69,6 +69,7 @@ export default {
           } )`
         )
         .call(d3.axisBottom(this.xScale).tickFormat((d) => d + "%"))
+        .raise()
         .append("text")
         .attr("y", 40)
         .attr("x", this.svgWidth / 2)
@@ -79,8 +80,10 @@ export default {
     drawYAxis() {
       d3.select(this.$refs.axisY)
         .call(d3.axisLeft(this.yScale).tickFormat(d3.format("$.2s")))
+        .raise()
         .append("text")
         .attr("transform", "rotate(-90)")
+        .attr("x", -6)
         .attr("y", 6)
         .attr("dy", "0.71em")
         .attr("text-anchor", "end")
@@ -88,9 +91,7 @@ export default {
         .text("Average Personal Yearly Income");
     },
     drawRects() {
-      const rectGroup = d3.select(this.$refs.rects);
-
-     
+      let rectGroup = d3.select(this.$refs.rects);
 
       rectGroup
         .selectAll("rect")
@@ -105,24 +106,28 @@ export default {
     },
 
     drawCircles() {
-      const circlesGroup = d3.select(this.$refs.circles);
+      let circlesGroup = d3
+        .select(this.$refs.circles)
+        .selectAll("circle")
+        .data(this.combinedData);
+
+      circlesGroup.exit().remove();
+
       circlesGroup
-        .selectAll(".circle")
-        .data(this.combinedData)
-        // .exit().remove()
         .enter()
         .append("circle")
         .attr("r", 4)
         .style("stroke", "#fff")
+        .merge(circlesGroup)
         .attr("cx", (d) => {
           return this.xScale(d[1]);
         })
-        .attr("cy", (d) => this.yScale(d[0]))
-        .style("fill", (d) => {
-          if (!d) return "#ccc";
-          let [a, b] = [d[0], d[1]];
-          return this.colors[this.y(b) + this.x(a) * this.n];
-        });
+        .attr("cy", (d) => this.yScale(d[0]));
+      // .style("fill", (d) => {
+      //   if (!d) return "#ccc";
+      //   let [a, b] = [d[0], d[1]];
+      //   return this.colors[this.y(b) + this.x(a) * this.n];
+      // });
       // .style("opacity", function (d) {
       //   console.log(d.filtered);
 
@@ -132,6 +137,7 @@ export default {
       //   return d.filtered ? 1 : 2;
       // });
     },
+    
   },
   computed: {
     educationRates: {
@@ -191,8 +197,8 @@ export default {
         d3.range(this.n)
       );
     },
-    rectangularProps(){
- let rectData = [];
+    rectangularProps() {
+      let rectData = [];
       let plotAreaWidth =
         this.svgWidth - this.svgPadding.left - this.svgPadding.right;
       let plotAreaHeight =
@@ -209,13 +215,14 @@ export default {
         });
       });
       return rectData;
-    }
+    },
   },
   watch: {
     combinedData: {
       handler() {
         this.drawScatterPlot();
       },
+
       deep: true,
     },
   },
