@@ -19,6 +19,9 @@ const store = new Vuex.Store({
     changeSelectedState(state, val) {
       state.selectedStates.push(val);
     },
+    removeState(state) {
+      state.selectedStates = [];
+    }
   },
   getters: {
     selectedYear: (state) => state.selectedYear,
@@ -53,7 +56,7 @@ const store = new Vuex.Store({
         if ((state.selectedYear in state.personalIncome[i]) && (state.selectedYear in state.educationRates[i])) {
           result.push([+state.personalIncome[i][state.selectedYear], +state.educationRates[i][state.selectedYear]]
           )
-          
+
         }
       }
       return result;

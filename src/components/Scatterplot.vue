@@ -1,17 +1,20 @@
 <template>
   <div class="vis-component" ref="chart">
     <div class="placeholder">
-      <!-- <b>Here comes the scatterplot</b>. -->
-      <!-- <p>Education Attainment Rate for the Selected Year: {{ educationRates }}</p> -->
+      <!-- <b>Here comes the scatterplot</b>.
+      <p>
+        Education Attainment Rate for the Selected Year: {{ educationRates }}
+      </p> -->
+
+      <svg class="main-svg" :width="svgWidth" :height="svgHeight">
+        <g class="chart-group" ref="chartGroup">
+          <g class="axis axis-x" ref="axisX"></g>
+          <g class="axis axis-y" ref="axisY"></g>
+          <g class="rects-group" ref="rects"></g>
+          <g class="circles-group" ref="circles"></g>
+        </g>
+      </svg>
     </div>
-    <svg class="main-svg" :width="svgWidth" :height="svgHeight">
-      <g class="chart-group" ref="chartGroup">
-        <g class="axis axis-x" ref="axisX"></g>
-        <g class="axis axis-y" ref="axisY"></g>
-        <g class="rects-group" ref="rects"></g>
-        <g class="circles-group" ref="circles"></g>
-      </g>
-    </svg>
   </div>
 </template>
 
@@ -106,6 +109,17 @@ export default {
     },
 
     drawCircles() {
+      let tooltip = d3
+        .select(".placeholder")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "0.5px")
+        .style("border-radius", "3px")
+        .style("padding", "8px");
+
       let circlesGroup = d3
         .select(this.$refs.circles)
         .selectAll("circle")
@@ -123,6 +137,21 @@ export default {
           return this.xScale(d[1]);
         })
         .attr("cy", (d) => this.yScale(d[0]));
+
+      circlesGroup
+        .data(this.educationRates)
+        .on("mouseover", () => tooltip.style("opacity", 1))
+        .on("mousemove", (event, d) => {
+          const [xm, ym] = d3.pointer(event);
+          return tooltip
+            .html(d.state)
+            .style("left", xm - 5 + "px")
+            .style("top", ym - 10 + "px");
+        })
+        .on("mouseleave", () =>
+          tooltip.transition().duration(250).style("opacity", 0)
+        );
+
       // .style("fill", (d) => {
       //   if (!d) return "#ccc";
       //   let [a, b] = [d[0], d[1]];
@@ -137,9 +166,19 @@ export default {
       //   return d.filtered ? 1 : 2;
       // });
     },
-    
+    handleCircleMouseHover(val) {
+      this.$store.commit("changeSelectedState", val);
+    },
+    handleCircleMouseOut() {
+      this.$store.commit("removeState");
+    },
   },
   computed: {
+    selectedStates: {
+      get() {
+        return this.$store.getters.selectedStates;
+      },
+    },
     educationRates: {
       get() {
         return this.$store.getters.educationRates;
