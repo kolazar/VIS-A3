@@ -1,12 +1,13 @@
 <template>
-  <div class="vis-component" ref="chart" >
+  <div class="vis-component" ref="chart">
     <div class="placeholder">
       <!-- <b>Here comes the choropleth map</b>. -->
       <!-- <p>Selected states by clicking on the bar chart: {{ selectedStates }}</p> -->
     </div>
     <svg class="main-svg" :width="svgWidth" :height="svgHeight">
-      <g class="chart-group" ref="chartGroup" >
+      <g class="chart-group" ref="chartGroup">
         <g class="map-group" ref="mapGroup"></g>
+        <rect class ="empty-area" :width="svgWidth" :height="svgHeight"> </rect>
       </g>
     </svg>
   </div>
@@ -57,7 +58,6 @@ export default {
 
       let path = d3.geoPath().projection(projection);
 
-
       d3.select(this.$refs.chartGroup)
         .attr(
           "transform",
@@ -69,20 +69,28 @@ export default {
         .attr("d", path)
         .data(this.combinedData)
         .attr("fill", (d) => {
-          console.log(d);
-          console.log(d.filtered);
-          if (!d) {return "#ccc"}
-           
-          else {
-              if (d.filtered){
-          return "#ddd"}
+          if (!d) {
+            return "#ccc";
+          } else {
+            if (d.filtered) {
+              return "#ddd";
+            }
 
-          let [a, b] = [d.personalIncome, d.educationRate];
-          return this.colors[this.y(b) + this.x(a) * this.n];
-        }
+            let [a, b] = [d.personalIncome, d.educationRate];
+            return this.colors[this.y(b) + this.x(a) * this.n];
+          }
         })
         .style("stroke", "#fff")
-        .style("stroke-width", 1);
+        .style("stroke-width", 1)
+        .on("click", (event, d) => this.handleStateClick(d.state));
+
+      d3.select(".empty-area").on("click", () => this.handleStateDeactivation());
+    },
+    handleStateClick(val) {
+      d3.select(`.${val}`).attr("fill", "red");
+    },
+    handleStateDeactivation() {
+      d3.selectAll("circle").attr("fill", "black");
     },
   },
   computed: {
@@ -121,5 +129,7 @@ export default {
 </script>
 
 <style>
-
+.empty-area{
+  opacity: 0;
+}
 </style>

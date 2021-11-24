@@ -120,6 +120,7 @@ export default {
       circlesGroup
         .enter()
         .append("circle")
+        .attr("class", d=> d.state)
         .attr("r", 4)
         .style("stroke", "#fff")
         .merge(circlesGroup)
@@ -223,7 +224,7 @@ export default {
       },
     },
     dataMaxEd() {
-      return d3.max(this.educationRates, (d) => d.value + 2);
+      return d3.max(this.educationRates, (d) => d.value);
     },
     dataMinEd() {
       return d3.min(this.educationRates, (d) => d.value);
@@ -235,7 +236,7 @@ export default {
           0,
           this.svgWidth - this.svgPadding.left - this.svgPadding.right,
         ])
-        .domain([this.dataMinEd - 1, this.dataMaxEd]);
+        .domain([this.dataMinEd, this.dataMaxEd]);
     },
     personalIncome: {
       get() {
@@ -243,7 +244,7 @@ export default {
       },
     },
     dataMaxInc() {
-      return d3.max(this.personalIncome, (d) => d.value + 2000);
+      return d3.max(this.personalIncome, (d) => d.value);
     },
     dataMinInc() {
       return d3.min(this.personalIncome, (d) => d.value);
@@ -255,7 +256,7 @@ export default {
           this.svgHeight - this.svgPadding.top - this.svgPadding.bottom,
           0,
         ])
-        .domain([this.dataMinInc - 2000, this.dataMaxInc]);
+        .domain([this.dataMinInc, this.dataMaxInc]);
     },
     combinedData: {
       get() {
