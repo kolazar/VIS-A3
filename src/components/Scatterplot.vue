@@ -5,13 +5,14 @@
       <p>
         Education Attainment Rate for the Selected Year: {{ educationRates }}
       </p> -->
-
+      <div class="tooltip"></div>
       <svg class="main-svg" :width="svgWidth" :height="svgHeight">
         <g class="chart-group" ref="chartGroup">
           <g class="axis axis-x" ref="axisX"></g>
           <g class="axis axis-y" ref="axisY"></g>
           <g class="rects-group" ref="rects"></g>
           <g class="circles-group" ref="circles"></g>
+          <g class="brush" ref="brush"></g>
         </g>
       </svg>
     </div>
@@ -28,7 +29,7 @@ export default {
     return {
       n: 3,
       colors: [
-        "#e8e8e8",
+        "#b3b2b2",
         "#e4acac",
         "#c85a5a",
         "#b0d5df",
@@ -109,17 +110,6 @@ export default {
     },
 
     drawCircles() {
-      let tooltip = d3
-        .select(".placeholder")
-        .append("div")
-        .style("opacity", 0)
-        .attr("class", "tooltip")
-        .style("background-color", "white")
-        .style("border", "solid")
-        .style("border-width", "0.5px")
-        .style("border-radius", "3px")
-        .style("padding", "8px");
-
       let circlesGroup = d3
         .select(this.$refs.circles)
         .selectAll("circle")
@@ -134,43 +124,91 @@ export default {
         .style("stroke", "#fff")
         .merge(circlesGroup)
         .attr("cx", (d) => {
-          return this.xScale(d[1]);
+          return this.xScale(d.educationRate);
         })
-        .attr("cy", (d) => this.yScale(d[0]));
+        .attr("cy", (d) => this.yScale(d.personalIncome));
 
       circlesGroup
-        .data(this.educationRates)
-        .on("mouseover", () => tooltip.style("opacity", 1))
-        .on("mousemove", (event, d) => {
-          const [xm, ym] = d3.pointer(event);
-          return tooltip
-            .html(d.state)
-            .style("left", xm - 5 + "px")
-            .style("top", ym - 10 + "px");
+        .data(this.combinedData)
+        .on("mouseover", () => this.handleCircleMouseHover())
+        .on("mousemove", (event, d) =>
+          this.handleCircleMouseMove(event, d.state)
+        )
+        .on("mouseleave", () => this.handleCircleMouseOut())
+
+        .style("fill", (d) => {
+          if (!d) return "#ccc";
+          let [a, b] = [d[0], d[1]];
+          return this.colors[this.y(b) + this.x(a) * this.n];
         })
-        .on("mouseleave", () =>
-          tooltip.transition().duration(250).style("opacity", 0)
-        );
+        .style("opacity", function (d) {
+          return d.filtered ? 0.5 : 1;
+        })
+        .style("stroke-width", function (d) {
+          return d.filtered ? 1 : 2;
+        });
 
-      // .style("fill", (d) => {
-      //   if (!d) return "#ccc";
-      //   let [a, b] = [d[0], d[1]];
-      //   return this.colors[this.y(b) + this.x(a) * this.n];
-      // });
-      // .style("opacity", function (d) {
-      //   console.log(d.filtered);
+      let brush = d3
+        .brush()
+        .extent([
+          [0, 0],
+          [
+            this.svgWidth - this.svgPadding.left - this.svgPadding.right,
+            this.svgHeight - this.svgPadding.top - this.svgPadding.bottom,
+          ],
+        ])
+        .on("start brush", (event) => this.brush(event));
 
-      //   return d.filtered ? 0.5 : 1;
-      // })
-      // .style("stroke-width", function (d) {
-      //   return d.filtered ? 1 : 2;
-      // });
+      d3.select(this.$refs.brush).call(brush);
     },
-    handleCircleMouseHover(val) {
-      this.$store.commit("changeSelectedState", val);
+
+    handleCircleMouseHover() {
+      return d3.select(".tooltip").style("opacity", 1);
+    },
+    handleCircleMouseMove(event, d) {
+      const [xm, ym] = d3.pointer(event);
+      return d3
+        .select(".tooltip")
+        .html(d)
+        .style("left", xm - 5 + "px")
+        .style("top", ym - 10 + "px");
     },
     handleCircleMouseOut() {
-      this.$store.commit("removeState");
+      return d3
+        .select(".tooltip")
+        .transition()
+        .duration(250)
+        .style("opacity", 0);
+    },
+    brush({ selection }) {
+      let x0 = this.xScale.invert(selection[0][0]);
+      let x1 = this.xScale.invert(selection[1][0]);
+      let y0 = this.yScale.invert(selection[1][1]);
+      let y1 = this.yScale.invert(selection[0][1]);
+
+      this.onBrush(x0, x1, y0, y1);
+    },
+
+    onBrush(x0, x1, y0, y1) {
+      let clear = x0 === x1 || y0 === y1;
+      let filtered = {
+        value: false,
+        state: "",
+      };
+      this.combinedData.forEach((d) => {
+        filtered.value = clear
+          ? false
+          : d.educationRate < x0 ||
+            d.educationRate > x1 ||
+            d.personalIncome < y0 ||
+            d.personalIncome > y1;
+
+        filtered.state = d.state;
+
+        this.$store.commit("changeFiltered", filtered);
+      });
+
+      // update();
     },
   },
   computed: {
@@ -226,13 +264,13 @@ export default {
     },
     x() {
       return d3.scaleQuantile(
-        Array.from(this.combinedData, (d) => d[0]),
+        Array.from(this.combinedData, (d) => d.personalIncome),
         d3.range(this.n)
       );
     },
     y() {
       return d3.scaleQuantile(
-        Array.from(this.combinedData, (d) => d[1]),
+        Array.from(this.combinedData, (d) => d.educationRate),
         d3.range(this.n)
       );
     },
@@ -269,4 +307,12 @@ export default {
 </script>
 
 <style>
+.tooltip {
+  opacity: 0;
+  background-color: white;
+  border-style: solid;
+  border-width: 0.5px;
+  border-radius: 3px;
+  padding: 8px;
+}
 </style>

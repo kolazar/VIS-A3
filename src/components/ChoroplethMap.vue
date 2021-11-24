@@ -23,7 +23,7 @@ export default {
     return {
       n: 3,
       colors: [
-        "#e8e8e8",
+        "#b3b2b2",
         "#e4acac",
         "#c85a5a",
         "#b0d5df",
@@ -69,25 +69,23 @@ export default {
         .attr("d", path)
         .data(this.combinedData)
         .attr("fill", (d) => {
-          if (!d) return "#ccc";
-          let [a, b] = [d[0], d[1]];
+          console.log(d);
+          console.log(d.filtered);
+          if (!d) {return "#ccc"}
+           
+          else {
+              if (d.filtered){
+          return "#ddd"}
+
+          let [a, b] = [d.personalIncome, d.educationRate];
           return this.colors[this.y(b) + this.x(a) * this.n];
+        }
         })
         .style("stroke", "#fff")
         .style("stroke-width", 1);
     },
   },
   computed: {
-    // educationRates: {
-    //   get() {
-    //     return this.$store.getters.educationRates;
-    //   },
-    // },
-    // personalIncome: {
-    //   get() {
-    //     return this.$store.getters.personalIncome;
-    //   },
-    // },
     selectedStates: {
       get() {
         return this.$store.getters.selectedStates;
@@ -100,30 +98,18 @@ export default {
     },
     x() {
       return d3.scaleQuantile(
-        Array.from(this.combinedData, (d) => d[0]),
+        Array.from(this.combinedData, (d) => d.personalIncome),
         d3.range(this.n)
       );
     },
     y() {
       return d3.scaleQuantile(
-        Array.from(this.combinedData, (d) => d[1]),
+        Array.from(this.combinedData, (d) => d.educationRate),
         d3.range(this.n)
       );
     },
   },
   watch: {
-    // educationRates: {
-    //   handler() {
-    //     this.drawMap();
-    //   },
-    //   deep: true,
-    // },
-    // personalIncome: {
-    //   handler() {
-    //     this.drawMap();
-    //   },
-    //   deep: true,
-    // },
     combinedData: {
       handler() {
         this.drawMap();
@@ -135,6 +121,5 @@ export default {
 </script>
 
 <style>
-.path {
-}
+
 </style>

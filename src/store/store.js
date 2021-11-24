@@ -10,7 +10,7 @@ const store = new Vuex.Store({
     selectedStates: [],
     educationRates: [],
     personalIncome: [],
-    combinedData: []
+    combinedData: [],
   },
   mutations: {
     changeSelectedYear(state, year) {
@@ -19,9 +19,14 @@ const store = new Vuex.Store({
     changeSelectedState(state, val) {
       state.selectedStates.push(val);
     },
-    removeState(state) {
-      state.selectedStates = [];
-    }
+    changeFiltered(state, val) {
+      for (let i =0; i<state.combinedData.length; i++){
+        if(state.combinedData[i].state === val.state){
+          state.combinedData[i].filtered = val.value;
+        }
+      }
+    },
+    
   },
   getters: {
     selectedYear: (state) => state.selectedYear,
@@ -54,9 +59,13 @@ const store = new Vuex.Store({
       let result = [];
       for (let i = 0; i < state.personalIncome.length; i++) {
         if ((state.selectedYear in state.personalIncome[i]) && (state.selectedYear in state.educationRates[i])) {
-          result.push([+state.personalIncome[i][state.selectedYear], +state.educationRates[i][state.selectedYear]]
-          )
-
+          result.push({
+            state: state.personalIncome[i].State,
+            personalIncome: +state.personalIncome[i][state.selectedYear],
+            educationRate: +state.educationRates[i][state.selectedYear],
+            filtered: false,
+          })
+            state.combinedData=result;
         }
       }
       return result;
@@ -71,6 +80,7 @@ const store = new Vuex.Store({
       d3.csv('./usa_personal-income-by-state_2006-2019.csv').then((data) => {
         state.personalIncome = data;
       })
+
     },
   }
 })
