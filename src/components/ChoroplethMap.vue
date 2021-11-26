@@ -7,7 +7,7 @@
     <svg class="main-svg" :width="svgWidth" :height="svgHeight">
       <g class="chart-group" ref="chartGroup">
         <g class="map-group" ref="mapGroup"></g>
-        <rect class ="empty-area" :width="svgWidth" :height="svgHeight"> </rect>
+        <rect class="empty-area" :width="svgWidth" :height="svgHeight"></rect>
       </g>
     </svg>
   </div>
@@ -39,8 +39,8 @@ export default {
       svgPadding: {
         top: 20,
         right: 20,
-        bottom: 20,
-        left: 20,
+        bottom: 50,
+        left: 100,
       },
     };
   },
@@ -75,29 +75,62 @@ export default {
             if (d.filtered) {
               return "#ddd";
             }
-
-            let [a, b] = [d.personalIncome, d.educationRate];
-            return this.colors[this.y(b) + this.x(a) * this.n];
+            return this.getColor(
+            this.xScale(d.educationRate),
+            this.yScale(d.personalIncome))
+            
           }
         })
         .style("stroke", "#fff")
         .style("stroke-width", 1)
         .on("click", (event, d) => this.handleStateClick(d.state));
 
-      d3.select(".empty-area").on("click", () => this.handleStateDeactivation());
+      d3.select(".empty-area").on("click", () =>
+        this.handleStateDeactivation()
+      );
     },
     handleStateClick(val) {
-      d3.select(`.${val}`).attr("fill", "red");
+      d3.select(`.${val.replace(/ /g, '.')}`).style("stroke-width", 4).style("stroke", "orange");
     },
     handleStateDeactivation() {
-      d3.selectAll("circle").data(this.combinedData).attr("fill", (d) => {
+      d3.selectAll("circle")
+        .data(this.combinedData)
+        .attr("fill", (d) => {
           if (!d) return "#ccc";
-          let [a, b] = [d.personalIncome, d.educationRate];
-          return this.colors[this.y(b) + this.x(a) * this.n];
-        });
+          return this.getColor(
+            this.xScale(d.educationRate),
+            this.yScale(d.personalIncome))
+        })
+        .style("opacity", function (d) {
+          return d.filtered ? 0.5 : 1;
+        })
+        .style("stroke-width", function (d) {
+          return d.filtered ? 1 : 2;
+        })
+        .style("stroke", "#fff");
+    },
+    getColor(x, y) {
+      let rectData = this.rectangularProps;
+      let color = "";
+      rectData.forEach((element) => {
+        if (
+          x >= element.x &&
+          x <= element.x1 &&
+          y <= element.y1 &&
+          y >= element.y
+        )
+          color = element.fill;
+      });
+
+      return color;
     },
   },
   computed: {
+    rectangularProps: {
+      get() {
+        return this.$store.getters.rectProps;
+      },
+    },
     selectedStates: {
       get() {
         return this.$store.getters.selectedStates;
@@ -108,18 +141,47 @@ export default {
         return this.$store.getters.combinedData;
       },
     },
-    x() {
-      return d3.scaleQuantile(
-        Array.from(this.combinedData, (d) => d.personalIncome),
-        d3.range(this.n)
-      );
+    educationRates: {
+      get() {
+        return this.$store.getters.educationRates;
+      },
     },
-    y() {
-      return d3.scaleQuantile(
-        Array.from(this.combinedData, (d) => d.educationRate),
-        d3.range(this.n)
-      );
+    dataMaxEd() {
+      return d3.max(this.educationRates, (d) => d.value);
     },
+    dataMinEd() {
+      return d3.min(this.educationRates, (d) => d.value);
+    },
+     xScale() {
+      return d3
+        .scaleLinear()
+        .rangeRound([
+          0,
+          this.svgWidth - this.svgPadding.left - this.svgPadding.right,
+        ])
+        .domain([this.dataMinEd, this.dataMaxEd]);
+    },
+    personalIncome: {
+      get() {
+        return this.$store.getters.personalIncome;
+      },
+    },
+    dataMaxInc() {
+      return d3.max(this.personalIncome, (d) => d.value);
+    },
+    dataMinInc() {
+      return d3.min(this.personalIncome, (d) => d.value);
+    },
+    yScale() {
+      return d3
+        .scaleLinear()
+        .rangeRound([
+          this.svgHeight - this.svgPadding.top - this.svgPadding.bottom,
+          0,
+        ])
+        .domain([this.dataMinInc, this.dataMaxInc]);
+    },
+
   },
   watch: {
     combinedData: {
@@ -133,7 +195,10 @@ export default {
 </script>
 
 <style>
-.empty-area{
+.empty-area {
   opacity: 0;
+  /* stroke: rgb(0, 0, 0);
+  stroke-width: 1;
+  fill: white; */
 }
 </style>

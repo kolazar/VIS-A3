@@ -8,13 +8,11 @@
       <div class="tooltip"></div>
       <svg class="main-svg" :width="svgWidth" :height="svgHeight">
         <g class="chart-group" ref="chartGroup">
-          
           <g class="axis axis-x" ref="axisX"></g>
           <g class="axis axis-y" ref="axisY"></g>
           <g class="rects-group" ref="rects"></g>
           <g class="brush" ref="brush"></g>
           <g class="circles-group" ref="circles"></g>
-          
         </g>
       </svg>
     </div>
@@ -142,7 +140,13 @@ export default {
         .attr("cx", (d) => {
           return this.xScale(d.educationRate);
         })
-        .attr("cy", (d) => this.yScale(d.personalIncome));
+        .attr("cy", (d) => this.yScale(d.personalIncome))
+        .attr("fill", (d) =>
+          this.getColor(
+            this.xScale(d.educationRate),
+            this.yScale(d.personalIncome)
+          )
+        );
 
       circlesGroup
         .on("mouseover", () => this.handleCircleMouseHover())
@@ -150,12 +154,6 @@ export default {
           this.handleCircleMouseMove(event, d.state)
         )
         .on("mouseleave", () => this.handleCircleMouseOut())
-
-        .attr("fill", (d) => {
-          if (!d) return "#ccc";
-          let [a, b] = [d.personalIncome, d.educationRate];
-          return this.colors[this.y(b) + this.x(a) * this.n];
-        })
         .style("opacity", function (d) {
           return d.filtered ? 0.5 : 1;
         })
@@ -209,6 +207,21 @@ export default {
 
         this.$store.commit("changeFiltered", filtered);
       });
+    },
+    getColor(x, y) {
+      let rectData = this.rectangularProps;
+      let color = "";
+      rectData.forEach((element) => {
+        if (
+          x >= element.x &&
+          x <= element.x1 &&
+          y <= element.y1 &&
+          y >= element.y
+        )
+          color = element.fill;
+      });
+
+      return color;
     },
   },
   computed: {
@@ -274,6 +287,7 @@ export default {
         d3.range(this.n)
       );
     },
+
     rectangularProps() {
       let rectData = [];
       let plotAreaWidth =
@@ -288,9 +302,12 @@ export default {
           height: plotAreaHeight / 3,
           x: i * (plotAreaWidth / 3),
           y: (this.n - 1 - j) * (plotAreaHeight / 3),
+          x1: i * (plotAreaWidth / 3) + plotAreaWidth / 3,
+          y1: (this.n - 1 - j) * (plotAreaHeight / 3) + plotAreaHeight / 3,
           fill: this.colors[j * this.n + i],
         });
       });
+      this.$store.commit('changeRectProps', rectData);
       return rectData;
     },
   },

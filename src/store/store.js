@@ -11,6 +11,7 @@ const store = new Vuex.Store({
     educationRates: [],
     personalIncome: [],
     combinedData: [],
+    rectProps:[]
   },
   mutations: {
     changeSelectedYear(state, year) {
@@ -25,10 +26,15 @@ const store = new Vuex.Store({
           state.combinedData[i].filtered = val.value;
         }
       }
+      
     },
+    changeRectProps(state, val){
+      state.rectProps = val;
+    }
     
   },
   getters: {
+    rectProps: (state) => state.rectProps,
     selectedYear: (state) => state.selectedYear,
     selectedStates: (state) => state.selectedStates,
     educationRates(state) {
