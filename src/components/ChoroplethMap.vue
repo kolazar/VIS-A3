@@ -90,7 +90,11 @@ export default {
       d3.select(`.${val}`).attr("fill", "red");
     },
     handleStateDeactivation() {
-      d3.selectAll("circle").attr("fill", "black");
+      d3.selectAll("circle").data(this.combinedData).attr("fill", (d) => {
+          if (!d) return "#ccc";
+          let [a, b] = [d.personalIncome, d.educationRate];
+          return this.colors[this.y(b) + this.x(a) * this.n];
+        });
     },
   },
   computed: {

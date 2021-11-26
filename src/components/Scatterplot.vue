@@ -8,11 +8,13 @@
       <div class="tooltip"></div>
       <svg class="main-svg" :width="svgWidth" :height="svgHeight">
         <g class="chart-group" ref="chartGroup">
+          
           <g class="axis axis-x" ref="axisX"></g>
           <g class="axis axis-y" ref="axisY"></g>
           <g class="rects-group" ref="rects"></g>
-          <g class="circles-group" ref="circles"></g>
           <g class="brush" ref="brush"></g>
+          <g class="circles-group" ref="circles"></g>
+          
         </g>
       </svg>
     </div>
@@ -106,10 +108,23 @@ export default {
         .attr("width", (d) => d.width)
         .attr("y", (d) => d.y)
         .attr("height", (d) => d.height)
-        .style("fill", (d) => d.fill);
+        .attr("fill", (d) => d.fill);
     },
 
     drawCircles() {
+      let brush = d3
+        .brush()
+        .extent([
+          [0, 0],
+          [
+            this.svgWidth - this.svgPadding.left - this.svgPadding.right,
+            this.svgHeight - this.svgPadding.top - this.svgPadding.bottom,
+          ],
+        ])
+        .on("brush", (event) => this.brush(event));
+
+      d3.select(this.$refs.brush).call(brush);
+
       let circlesGroup = d3
         .select(this.$refs.circles)
         .selectAll("circle")
@@ -120,7 +135,7 @@ export default {
       circlesGroup
         .enter()
         .append("circle")
-        .attr("class", d=> d.state)
+        .attr("class", (d) => d.state)
         .attr("r", 4)
         .style("stroke", "#fff")
         .merge(circlesGroup)
@@ -130,16 +145,15 @@ export default {
         .attr("cy", (d) => this.yScale(d.personalIncome));
 
       circlesGroup
-        .data(this.combinedData)
         .on("mouseover", () => this.handleCircleMouseHover())
         .on("mousemove", (event, d) =>
           this.handleCircleMouseMove(event, d.state)
         )
         .on("mouseleave", () => this.handleCircleMouseOut())
 
-        .style("fill", (d) => {
+        .attr("fill", (d) => {
           if (!d) return "#ccc";
-          let [a, b] = [d[0], d[1]];
+          let [a, b] = [d.personalIncome, d.educationRate];
           return this.colors[this.y(b) + this.x(a) * this.n];
         })
         .style("opacity", function (d) {
@@ -148,19 +162,6 @@ export default {
         .style("stroke-width", function (d) {
           return d.filtered ? 1 : 2;
         });
-
-      let brush = d3
-        .brush()
-        .extent([
-          [0, 0],
-          [
-            this.svgWidth - this.svgPadding.left - this.svgPadding.right,
-            this.svgHeight - this.svgPadding.top - this.svgPadding.bottom,
-          ],
-        ])
-        .on("start brush", (event) => this.brush(event));
-
-      d3.select(this.$refs.brush).call(brush);
     },
 
     handleCircleMouseHover() {
@@ -208,8 +209,6 @@ export default {
 
         this.$store.commit("changeFiltered", filtered);
       });
-
-      // update();
     },
   },
   computed: {
