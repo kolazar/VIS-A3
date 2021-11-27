@@ -141,12 +141,13 @@ export default {
           return this.xScale(d.educationRate);
         })
         .attr("cy", (d) => this.yScale(d.personalIncome))
-        .attr("fill", (d) =>
-          this.getColor(
+        .attr("fill", (d) => {
+
+          return this.getColor(
             this.xScale(d.educationRate),
             this.yScale(d.personalIncome)
-          )
-        );
+          );
+        });
 
       circlesGroup
         .on("mouseover", () => this.handleCircleMouseHover())
@@ -307,7 +308,6 @@ export default {
           fill: this.colors[j * this.n + i],
         });
       });
-      this.$store.commit('changeRectProps', rectData);
       return rectData;
     },
   },

@@ -53,7 +53,7 @@ export default {
 
       let projection = d3
         .geoAlbersUsa()
-        .scale([this.svgWidth * 1.1])
+        .scale([this.svgWidth])
         .translate([this.svgWidth / 2.1, this.svgHeight / 2.1]);
 
       let path = d3.geoPath().projection(projection);
@@ -71,14 +71,10 @@ export default {
         .attr("fill", (d) => {
           if (!d) {
             return "#ccc";
+          } else if (d.filtered) {
+            return "#ddd";
           } else {
-            if (d.filtered) {
-              return "#ddd";
-            }
-            return this.getColor(
-            this.xScale(d.educationRate),
-            this.yScale(d.personalIncome))
-            
+            return d3.select(`.${d.state.replace(/ /g, ".")}`).attr("fill");
           }
         })
         .style("stroke", "#fff")
@@ -90,16 +86,17 @@ export default {
       );
     },
     handleStateClick(val) {
-      d3.select(`.${val.replace(/ /g, '.')}`).style("stroke-width", 4).style("stroke", "orange");
+      d3.select(`.${val.replace(/ /g, ".")}`)
+        .style("stroke-width", 4)
+        .style("stroke", "orange");
     },
     handleStateDeactivation() {
       d3.selectAll("circle")
         .data(this.combinedData)
         .attr("fill", (d) => {
           if (!d) return "#ccc";
-          return this.getColor(
-            this.xScale(d.educationRate),
-            this.yScale(d.personalIncome))
+          return d3.select(`.${d.state.replace(/ /g, ".")}`).attr("fill");
+          
         })
         .style("opacity", function (d) {
           return d.filtered ? 0.5 : 1;
@@ -109,28 +106,10 @@ export default {
         })
         .style("stroke", "#fff");
     },
-    getColor(x, y) {
-      let rectData = this.rectangularProps;
-      let color = "";
-      rectData.forEach((element) => {
-        if (
-          x >= element.x &&
-          x <= element.x1 &&
-          y <= element.y1 &&
-          y >= element.y
-        )
-          color = element.fill;
-      });
-
-      return color;
-    },
+    
   },
   computed: {
-    rectangularProps: {
-      get() {
-        return this.$store.getters.rectProps;
-      },
-    },
+    
     selectedStates: {
       get() {
         return this.$store.getters.selectedStates;
@@ -141,47 +120,6 @@ export default {
         return this.$store.getters.combinedData;
       },
     },
-    educationRates: {
-      get() {
-        return this.$store.getters.educationRates;
-      },
-    },
-    dataMaxEd() {
-      return d3.max(this.educationRates, (d) => d.value);
-    },
-    dataMinEd() {
-      return d3.min(this.educationRates, (d) => d.value);
-    },
-     xScale() {
-      return d3
-        .scaleLinear()
-        .rangeRound([
-          0,
-          this.svgWidth - this.svgPadding.left - this.svgPadding.right,
-        ])
-        .domain([this.dataMinEd, this.dataMaxEd]);
-    },
-    personalIncome: {
-      get() {
-        return this.$store.getters.personalIncome;
-      },
-    },
-    dataMaxInc() {
-      return d3.max(this.personalIncome, (d) => d.value);
-    },
-    dataMinInc() {
-      return d3.min(this.personalIncome, (d) => d.value);
-    },
-    yScale() {
-      return d3
-        .scaleLinear()
-        .rangeRound([
-          this.svgHeight - this.svgPadding.top - this.svgPadding.bottom,
-          0,
-        ])
-        .domain([this.dataMinInc, this.dataMaxInc]);
-    },
-
   },
   watch: {
     combinedData: {
