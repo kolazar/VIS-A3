@@ -20,15 +20,16 @@ const store = new Vuex.Store({
       state.selectedStates.push(val);
     },
     changeFiltered(state, val) {
-      for (let i =0; i<state.combinedData.length; i++){
-        if(state.combinedData[i].state === val.state){
+      for (let i = 0; i < state.combinedData.length; i++) {
+        if (state.combinedData[i].state === val.state) {
           state.combinedData[i].filtered = val.value;
+        
         }
       }
-      
+
     },
-   
-    
+
+
   },
   getters: {
     selectedYear: (state) => state.selectedYear,
@@ -65,10 +66,12 @@ const store = new Vuex.Store({
             state: state.personalIncome[i].State,
             personalIncome: +state.personalIncome[i][state.selectedYear],
             educationRate: +state.educationRates[i][state.selectedYear],
-            filtered: false,
+            filtered:false,
           })
-            state.combinedData=result;
+          
+          state.combinedData = result;
         }
+       
       }
       return result;
     },

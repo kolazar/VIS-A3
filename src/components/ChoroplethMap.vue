@@ -96,7 +96,6 @@ export default {
         .attr("fill", (d) => {
           if (!d) return "#ccc";
           return d3.select(`.${d.state.replace(/ /g, ".")}`).attr("fill");
-          
         })
         .style("opacity", function (d) {
           return d.filtered ? 0.5 : 1;
@@ -106,21 +105,15 @@ export default {
         })
         .style("stroke", "#fff");
     },
-    
   },
   computed: {
-    
-    selectedStates: {
-      get() {
-        return this.$store.getters.selectedStates;
-      },
-    },
     combinedData: {
       get() {
         return this.$store.getters.combinedData;
       },
     },
   },
+
   watch: {
     combinedData: {
       handler() {

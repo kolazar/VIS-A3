@@ -65,6 +65,7 @@ export default {
       this.drawCircles();
     },
     drawXAxis() {
+      d3.select(".xaxis").remove();
       d3.select(this.$refs.axisX)
         .attr(
           "transform",
@@ -75,6 +76,7 @@ export default {
         .call(d3.axisBottom(this.xScale).tickFormat((d) => d + "%"))
         .raise()
         .append("text")
+        .attr("class", "xaxis")
         .attr("y", 40)
         .attr("x", this.svgWidth / 2)
         .attr("text-anchor", "middle")
@@ -82,11 +84,13 @@ export default {
         .text("Educational Attainment: Bachelor's Degree or Higher");
     },
     drawYAxis() {
+      d3.select(".yaxis").remove();
       d3.select(this.$refs.axisY)
         .call(d3.axisLeft(this.yScale).tickFormat(d3.format("$.2s")))
         .raise()
         .append("text")
         .attr("transform", "rotate(-90)")
+        .attr("class", "yaxis")
         .attr("x", -6)
         .attr("y", 6)
         .attr("dy", "0.71em")
@@ -119,7 +123,9 @@ export default {
             this.svgHeight - this.svgPadding.top - this.svgPadding.bottom,
           ],
         ])
-        .on("brush", (event) => this.brush(event));
+        .on("start brush", (event) => {
+          return this.brush(event);
+        });
 
       d3.select(this.$refs.brush).call(brush);
 
@@ -142,14 +148,11 @@ export default {
         })
         .attr("cy", (d) => this.yScale(d.personalIncome))
         .attr("fill", (d) => {
-
           return this.getColor(
             this.xScale(d.educationRate),
             this.yScale(d.personalIncome)
           );
-        });
-
-      circlesGroup
+        })
         .on("mouseover", () => this.handleCircleMouseHover())
         .on("mousemove", (event, d) =>
           this.handleCircleMouseMove(event, d.state)
@@ -171,8 +174,8 @@ export default {
       return d3
         .select(".tooltip")
         .html(d)
-        .style("left", xm - 5 + "px")
-        .style("top", ym - 10 + "px");
+        .style("left", xm - 40 + "px")
+        .style("top", ym + "px");
     },
     handleCircleMouseOut() {
       return d3
@@ -209,6 +212,10 @@ export default {
         this.$store.commit("changeFiltered", filtered);
       });
     },
+    resetBrush() {
+      let brush = d3.brush();
+      d3.select(this.$refs.brush).call(brush.move, null);
+    },
     getColor(x, y) {
       let rectData = this.rectangularProps;
       let color = "";
@@ -226,9 +233,9 @@ export default {
     },
   },
   computed: {
-    selectedStates: {
+    selectedYear: {
       get() {
-        return this.$store.getters.selectedStates;
+        return this.$store.getters.selectedYear;
       },
     },
     educationRates: {
@@ -249,7 +256,7 @@ export default {
           0,
           this.svgWidth - this.svgPadding.left - this.svgPadding.right,
         ])
-        .domain([this.dataMinEd, this.dataMaxEd]);
+        .domain([this.dataMinEd - 1, this.dataMaxEd + 1]);
     },
     personalIncome: {
       get() {
@@ -269,24 +276,12 @@ export default {
           this.svgHeight - this.svgPadding.top - this.svgPadding.bottom,
           0,
         ])
-        .domain([this.dataMinInc, this.dataMaxInc]);
+        .domain([this.dataMinInc - 2000, this.dataMaxInc + 1000]);
     },
     combinedData: {
       get() {
         return this.$store.getters.combinedData;
       },
-    },
-    x() {
-      return d3.scaleQuantile(
-        Array.from(this.combinedData, (d) => d.personalIncome),
-        d3.range(this.n)
-      );
-    },
-    y() {
-      return d3.scaleQuantile(
-        Array.from(this.combinedData, (d) => d.educationRate),
-        d3.range(this.n)
-      );
     },
 
     rectangularProps() {
@@ -315,6 +310,13 @@ export default {
     combinedData: {
       handler() {
         this.drawScatterPlot();
+      },
+
+      deep: true,
+    },
+    selectedYear: {
+      handler() {
+        this.resetBrush();
       },
 
       deep: true,
