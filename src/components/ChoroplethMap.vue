@@ -22,13 +22,12 @@ export default {
   props: {},
   data() {
     return {
-      n: 3,
       colors: [
         "#b3b2b2",
         "#e4acac",
         "#c85a5a",
         "#b0d5df",
-        "#ad9ea5",
+        "#907881",
         "#985356",
         "#64acbe",
         "#627f8c",

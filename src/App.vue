@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-12">
-          <h1>Average Personal Income vs Educational Attainment</h1>
+          <h1>Average Personal Income and Educational Attainment Prevalence Per State</h1>
         </div>
       </div>
       <div class="row">
