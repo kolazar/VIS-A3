@@ -16,15 +16,16 @@
 11. Implemented deactivation of data points highlight when clicking outside the map.
 12. Added a title summarizing the visualization.
 
-Challenges occured during the implementation:
+### Challenges occured during the implementation:
 - represent the colors correctly (matching the range from low-low to high-high) both on the scatter plot and on the map; 
 - draw the background of the scatter plot. For this, I needed to recall how the coordinate system is represented in SVG as well to compute the necessary coordinates;
 
-Sidenotes:
+### Sidenotes:
 - I chose the color scheme such as it can be understood by the end-user and taking into consideration possible defects in color recognition. Thus, colors were chosen neutral and going from light (representing low-low relationship) to darker (high-high relationship);
-- the hihglhighting of the point is done by changing the point stroke. Thus, it brings end-user attention without distrating it too much.
+- the hihglhighting of the point is done by changing the point stroke. Thus, it brings end-user attention without distrating it too much;
+- I decided to do scales not starting from zero to have a better representation of the data points on the scatterplot.
 
-References:
+### References:
 - Boiler plate code: https://github.com/asilcetin/vis-vue-d3;
 - Brushable Scatterplot/Choropleth: https://bl.ocks.org/cmgiven/abca90f6ba5f0a14c54d1eb952f8949c;
 - Bivariate Choropleth: https://observablehq.com/@d3/bivariate-choropleth;
@@ -59,6 +60,5 @@ yarn run lint
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
-## Assignment description
-It was decided to do scales not starting from zero to have a better representation of the data points on the scatterplot.
+
 
